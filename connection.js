@@ -23,6 +23,10 @@ function Connection(socket, cluster) {
 
   socket.setKeepAlive(true);
   socket.setEncoding('utf-8');
+
+  socket.on('data', function (data) {
+    process.stdout.write(data);
+  });
 }
 
 Connection.prototype.end = function () {

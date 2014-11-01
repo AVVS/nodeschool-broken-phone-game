@@ -11,8 +11,7 @@ module.exports = function (cluster, port) {
   var options = {
     port: port,
     status: 'O',
-    target: '192.168.0.0/16', // subnet, hardcoded
-    banner: true
+    target: '192.168.0.0/16' // subnet, hardcoded
   };
 
   var scanner = new evilscan(options, function (self) {
@@ -42,6 +41,8 @@ module.exports = function (cluster, port) {
     socket.on('connect', function () {
       socket.removeAllListeners('error');
       cluster[ip] = new Connection(socket, cluster);
+
+      socket.write('Hi from '+ localIpAddress + '\n');
     });
 
   });
