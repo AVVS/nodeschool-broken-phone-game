@@ -12,20 +12,22 @@ var server = net.createServer();
 var statsInterval;
 server.listen(port);
 
-statsInterval = setInterval(function () {
+function activeConnections() {
   var keys = Object.keys(cluster);
-  keys = keys.filter(function (addr) {
+  return keys.filter(function (addr) {
     return cluster[addr];
   });
+}
 
-  console.log('Clients connected: ', keys);
+statsInterval = setInterval(function () {
+  console.log('Clients connected: ', activeConnections().join(', '));
 }, 5000);
 
 server.on('listening', function () {
   console.log('Listening on port', port);
 
   // pass shared state of connections
-  scan(cluster, port);
+  scan(cluster, port, activeConnections);
 });
 
 server.on('connection', function (socket) {
@@ -40,7 +42,7 @@ server.on('connection', function (socket) {
   }
 
   console.log('New connection from outside: ', remoteAddress);
-  cluster[remoteAddress] = new Connection(socket, cluster);
+  cluster[remoteAddress] = new Connection(socket, cluster, activeConnections);
 
 });
 

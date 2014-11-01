@@ -1,5 +1,5 @@
 
-function Connection(socket, cluster) {
+function Connection(socket, cluster, activeConnections) {
   var _this = this;
 
   var remoteAddress = socket.remoteAddress;
@@ -24,14 +24,30 @@ function Connection(socket, cluster) {
   socket.setKeepAlive(true);
   socket.setEncoding('utf-8');
 
-  socket.on('data', function (data) {
-    process.stdout.write(data);
-  });
+  socket.on('data', this.interpretCommand.bind(this));
+
+  // sniff
+  this.sendCommand('DISCOVERY', activeConnections());
 }
 
 Connection.prototype.end = function () {
   this.socket.end();
-}
+};
 
+Connection.prototype.sendCommand = function (cmd, data) {
+  if (!data) {
+    throw new Error('Data must be a string or an object');
+  }
+
+  if (typeof data === 'object' && data) {
+    data = JSON.stringify(data);
+  }
+
+  this.socket.write('CMD::' + cmd + '::' + data + '\n');
+};
+
+Connection.prototype.interpretCommand = function (data) {
+  process.stdout.write('Command_inc: ' + data);
+};
 
 module.exports = Connection;

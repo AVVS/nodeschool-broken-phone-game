@@ -6,7 +6,7 @@ var evilscan = require('evilscan');
 
 console.log('Local ip address: ', localIpAddress);
 
-module.exports = function (cluster, port) {
+module.exports = function (cluster, port, activeConnections) {
 
   var options = {
     port: port,
@@ -40,9 +40,8 @@ module.exports = function (cluster, port) {
 
     socket.on('connect', function () {
       socket.removeAllListeners('error');
-      cluster[ip] = new Connection(socket, cluster);
-
-      socket.write('Hi from '+ localIpAddress + '\n');
+      var conn = new Connection(socket, cluster, activeConnections);
+      cluster[ip] = conn;
     });
 
   });
